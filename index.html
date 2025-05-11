@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CEC Applications - GIS Tool</title>
+<!------------------------------------------------------------------------------->
+
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!------------------------------------------------------------------------------->
+
+<!--Project 4 Library-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
+
+
+  <!-- Leaflet Geocoder Plugin -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+  <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+<!------------------------------------------------------------------------------->
+  
+  <!-- Leaflet Draw CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+  <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+<!------------------------------------------------------------------------------->
+
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+
+<!-------------------------------------------------------------------------------->
+
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  
+<div id="rightPanel" class="collapsed">
+  <div class="right-panel-content">
+  <div class="section-blockA" id="cecsSection">
+    <div class="section-label">Surrounding CECs (within 1km):</div>
+	<button onclick="toggleCECList()">Toggle List</button>
+    <div id="cecList"  style="display: none;">
+      <table id ="cecListTab" class="styled-table" border="1" style="width: 95%; font-size: 0.9em;">
+        <thead>
+          <tr>
+            <th style="width: 25%;">CEC Ref #</th>
+            <th style="width: 25%;">Year</th>
+            <th style="width: 45%;">Status</th>
+          </tr>
+        </thead>
+        <tbody id="cecListBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section-block" id="receptorsSection">
+    <div class="section-label">Receptors of Interest:</div>
+        <table id="receptorsTable" class="styled-table" border="1" style="width: 100%; font-size: 0.9em;">
+      <thead>
+        <tr>
+          <th style="width: 65%;">Feature</th>
+          <th style="width: 25%;">Distance (m)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="section-block" id="otherInfoSection">
+    <div class="section-label">Other Information:</div>
+	 <hr class="section-divider" />
+    <ul style="font-size: 0.85em;" id="intersectingLabelsList">
+        <li><strong>Municipality(ies):</strong> <span id="municipalityLabel"></span></li>
+		<hr class="section-divider" />
+        <li><strong>Watershed(s):</strong> <span id="watershedLabel"></span></li>
+        <hr class="section-divider" />
+		<li><strong>Ecological Susceptibility:</strong> <span id="ecoLabel"></span></li>
+        <hr class="section-divider" />
+		<li><strong>Geological Susceptibility:</strong> <span id="geoLabel"></span></li>
+        <hr class="section-divider" />
+		<li><strong>Hydrogeology:</strong> <span id="hydroLabel"></span></li>
+        <hr class="section-divider" />
+		<li><strong>Social Susceptibility:</strong> <span id="socialLabel"></span></li>
+        <hr class="section-divider" />
+		<li><strong>TCPD Policy:</strong> <span id="tcpdLabel"></span></li>
+		<hr class="section-divider" />
+      </ul>
+  </div>
+
+  <div class="section-block2" id="placeholderSection">
+  <!--  <button id="runSpatialAnalysisBtn">Spatial Analysis</button> --->
+  <button id="useDrawnFeatureBtn">Spatial Analysis</button>
+  <button id="clearSpatialBtn">Clear</button>
+</div>
+
+  </div>
+</div>
+
+</div>
+
+<div id="rightPanelToggleContainer">
+  <button id="rightPanelToggle">&#x25C0;</button>
+</div>
+
+  
+  <div id="container">
+<!------------------------------------------------------------------------------->
+    
+	<!-- Data Panel -->
+    <div id="data">
+      <div id="title">
+        <h2><strong>CEC Applications - GIS Tool</strong></h2>
+      </div>
+	  
+	<div id="viewToggle">
+	  <button id="toggleViewButton">Show Heatmap View</button>
+	</div>
+<!------------------------------------------------------------------------------->	
+	  <div id="welcome-container">
+        <div id="welcome">
+          <p>This tool integrates CEC Applications and other EMA housed data to offer a basic solution for analysis. It is designed to facilitate some general analysis which may assist with better informed decision-making.</p>
+          <p>
+			<div id= "docuLinks">
+			<a href="https://drive.google.com/file/d/1VKfjK3KEq_U3nK0OnuZLw-4t0aIkrvcm/view?usp=drive_link" target="_blank" rel="noopener noreferrer">Documentation</a><br>
+            <a href="https://docs.google.com/spreadsheets/d/1vUnovvw4xDDZq-IH82ZxwCrZp7U1P-Vfbbof-a_JTYI/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">CEC Applications Data</a>
+          <!--  <a href="mailto:CEC@ema.co.tt">CEC@ema.co.tt</a>  -->
+		  </div>
+          </p>
+        </div>
+        <button id="toggleBtn">Close Info Panel</button>
+      </div>
+	  <hr class="section-divider" />
+<!------------------------------------------------------------------------------->
+		<div id="filterPanel">
+		  <p><strong>Choose the range and status of interest</strong></p>
+
+		  <div class="filter-row">
+			<button class="filter-label" disabled>Year - Start</button>
+			<select id="yearStart"></select>
+		  </div>
+
+		  <div class="filter-row">
+			<button class="filter-label" disabled>Year - End</button>
+			<select id="yearEnd"></select>
+		  </div>
+
+		  <div class="filter-row">
+			<button class="filter-label" disabled>Status</button>
+			<select id="statusFilter"></select>
+		  </div>
+
+		  <div class="filter-actions">
+			<button id="applyFiltersBtn">Apply Filters</button>
+			<button id="clearFiltersBtn">Clear Filters</button>
+		  </div>
+
+		  <button id="resultsCount" disabled>Showing 0 applications</button>
+		  
+		</div>
+<!------------------------------------------------------------------------------->
+
+		<hr class="section-divider" />
+		<div id="drawTools">
+		  <p><strong>Draw Tools</strong></p>
+		<p style="font-size: 0.85em; margin-top: -8px; color: #000000;">Draw polygons or place points on the map.</p>
+		</div>
+
+		<br>
+	<hr class="section-divider" />
+<!------------------------------------------------------------------------------->
+
+		<div id="geojsonPanel">
+		  <p><strong>Toggle Layers</strong></p>
+		  <div id="geojsonLayerList" class="layer-list"></div>
+		</div>
+
+		<hr class="section-divider" /> 
+	
+	<!-- NSL Analysis Section -->
+		<div id="nslAnalysis">
+		  <p class="nsl-heading"><strong>NSL Analysis</strong></p>
+
+		  <div class="nsl-buttons">
+			<button onclick="window.open('https://drive.google.com/file/d/1a61Tte8xPK8YM4FgRKFaeqsfwEoMgs3N/view?usp=drive_link')">Read Me</button>
+			<button id="daSelectionBtn">DA Selection</button>
+			<button id="riskAssessmentBtn">Risk Assessment</button>
+			<button id="modelOutputBtn">Model Output</button>
+		  </div>
+		<hr class="section-divider" />
+		
+		  <div class="cec-contact">
+			<p>
+			  CEC Unit - Technical Services<br>
+			  Environmental Management Authority<br>
+			  <a href="mailto:CEC@ema.co.tt">CEC@ema.co.tt</a>
+			</p>
+		  </div>
+		</div>
+	</div>
+
+    <!-- Map Panel -->
+    <div id="map"></div>
+  </div>
+
+<!------------------------------------------------------------------------------->
+<!-- DA Selection Modal -->
+<div id="daSelectionModal" class="nsl-modal">
+  <div class="nsl-modal-content">
+    <span class="modal-close" id="closeDASelectionModal">&times;</span>
+	<h3>Designated Activity Selection</h3>
+
+    <label><strong>Project Title</strong></label>
+    <textarea id="projectTitle" placeholder="Enter project details..." rows="2"></textarea>
+
+    <label><strong>CEC Number</strong></label>
+    <input type="text" id="cecNumber" placeholder="e.g. CEC-0000/2024" />
+
+    <label><strong>Location</strong></label>
+    <div class="location-input">
+      <input type="text" id="latlonInput" placeholder="Enter coordinates" />
+      <!--<button id="useDrawnFeatureBtn">Use Last Drawn Shape</button> -->
+    </div>
+
+    <label><strong>Select Applicable Designated Activities</strong></label>
+    <div class="da-table-container">
+      <table id="daTable">
+        <thead>
+          <tr>
+            <th>Designated Activity</th>
+            <th>Description</th>
+            <th>Selection</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="modal-actions">
+      <button id="clearDAForm">Clear</button>
+      <button id="confirmDAForm">Confirm & Continue</button>
+    </div>
+  </div>
+</div>
+<!------------------------------------------------------------------------------>
+<!-- Risk Assessment Modal -->
+<div id="riskAssessmentModal" class="nsl-modal">
+  <div class="nsl-modal-content">
+    <span class="modal-close" id="closeRiskModal">&times;</span>
+    <h3>Risk Assessment</h3>
+
+    <p><strong>Project Title:</strong> <span id="riskProjectTitle"></span></p>
+    <p><strong>CEC Number:</strong> <span id="riskCecNumber"></span></p>
+
+    <div class="da-table-container">
+      <table id="riskTable">
+        <thead>
+          <tr>
+            <th>Designated Activity</th>
+            <th>Nature</th>
+            <th>Scale</th>
+            <th>Location</th>
+            <th>Nature Risk Guidance</th>
+            <th>Scale Risk Guidance</th>
+            <th>Location Risk Guidance</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="modal-actions">
+      <button id="confirmRiskBtn">Confirm & Continue</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+<!------------------------------------------------------------------->
+<!-- Model Output Modal -->
+<div id="modelOutputModal" class="nsl-modal">
+  <div class="nsl-modal-content">
+
+    <!-- Modal Close Button -->
+    <span class="modal-close" id="closeModelOutputModal" aria-label="Close modal">&times;</span>
+
+    <!-- Heading -->
+    <div id="heading">
+      <h3>NSL Output</h3>
+    </div>
+
+    <!-- Project Info -->
+    <div id="projectt">
+      <p><strong>Project Title:</strong> <span id="outputProjectTitle"></span></p>
+      <hr class="section-divider" />
+      <p><strong>Location:</strong> <span id="outputlatlonInput"></span></p>
+    </div>
+
+    <hr class="section-divider" />
+
+    <!-- CEC Number -->
+    <div id="CECnum">
+      <p><strong>CEC Number:</strong> <span id="outputCecNumber"></span></p>
+    </div>
+
+    <hr class="section-divider" />
+
+    <!-- Selected Activities -->
+    <div id="selectedActivitiesList">
+      <p><strong>Designated Activities Selected:</strong></p>
+      <ul id="activityListOutput"></ul>
+    </div>
+
+    <hr class="section-divider" />
+
+    <!-- NSL Result Summary -->
+    <div id="nslResult">
+      <p><strong>NSL Index (%):</strong> <span id="nslScoreDisplay"></span></p>
+      <p><strong>NSL Threshold (%):</strong> 75%</p>
+      <p><strong>NSL Index Decision:</strong> <span id="nslDecisionText"></span></p>
+    </div>
+
+    <hr class="section-divider" />
+
+    <!-- NSL % Graph -->
+    <div id="nslGraphContainer" class="output-section">
+      <div class="chart-wrapper">
+        <canvas id="nslGraphCanvas" width="200px" height="100px"></canvas>
+      </div>
+    </div>
+
+    <hr class="section-divider" />
+
+    <!-- NSL Index Details -->
+    <div id="nslDetails">
+      <p><strong>NSL Index Details:</strong></p>
+    </div>
+    <div id="nslIndexDetail" class="nsl-detail-text" style="margin-top: 10px;"></div>
+
+    <hr class="section-divider" />
+<div class="officer-decision-section" style="margin-top: 20px;">
+  <label for="officerDecision" style="font-weight: bold;">Officer Decision:</label>
+  <textarea id="officerDecision" rows="2" placeholder="Type your decision or notes here..." oninput="autoExpand(this)"></textarea>
+</div>
+
+    <div id="signatureSection">
+      <label for="typedSignature"><strong>Your Signature:</strong></label>
+      <input type="text" id="typedSignature" placeholder="Type your name here..." />
+    </div>
+	  <div id="outputDate" class="output-date"></div>
+  </div>
+  
+
+  
+  <hr class="section-divider" />
+  
+<button id="downloadModelPDF">Download as PDF</button>
+
+
+
+  </div>
+</div>
+
+     <!-- Spatial Analysis Results (conditionally shown) -->
+    <div id="spatialAnalysisSection" style="display: none; margin-top: 20px;">
+      <div id="spatialhead">
+        <h4>Spatial Analysis</h4>
+      </div>
+
+      <hr class="section-divider" />
+
+      <div id="spatialLoading">Analyzing nearby features...</div>
+
+      <div id="spatialResults" style="display: none;">
+        <!-- Dynamic content will be injected here -->
+      </div>
+    </div> 
+   
+
+<!-----------------------------------------------------------------
+
+ 
+<!-----------------------------------------------------------------
+
+<div id="downloadOptions" style="margin: 10px 0 0 1%; display: flex; align-items: center; gap: 10px;">
+  <button id="downloadBtn" style="background-color: #1B5E20; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer;">
+    Download
+  </button>
+  <select id="downloadFormat" style="font-size: 0.9em;">
+    <option value="pdf">PDF</option>
+    <option value="jpeg">JPEG</option>
+  </select>
+</div>
+
+  
+</div>
+
+
+
+<!------------------------------------------------------------------------------->
+  
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+<!------------------------------------------------------------------------------->
+
+<!-- Leaflet MarkerCluster -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"
+/>
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"
+/>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<!------------------------------------------------------------------------------->
+  
+  <!-- Custom JS -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="map.js"></script>
+<!-------------------------------------------------------------------------------->
+<!-- jsPDF for PDF download -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+
+
+  
+</body>
+</html>

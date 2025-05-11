@@ -1,0 +1,989 @@
+html, body {
+  margin: 0;
+  height: 100%;
+  font-family: Arial, sans-serif;
+}
+
+/* Main container */
+#container {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+}
+
+/* Sidebar */
+#data {
+  width: 20%;
+  height: 100vh;
+  background-color: #ecf2e6;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  box-sizing: border-box;
+  border-right: 1px solid #ccc;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+#docuLinks{
+	font-size:0.9em;
+}
+
+#filterPanel,
+#geojsonPanel,
+#drawTools {
+  flex-shrink: 0;
+}
+
+/* Title always visible */
+#title {
+  flex-shrink: 0;
+  color: #1B5E20;
+}
+
+#title h2 {
+  font-size: 1.3em;
+  margin-bottom: 10px;
+}
+
+/* Welcome text collapsible */
+#welcome-container {
+  display: flex;
+  flex-direction: column;
+  transition: height 0.3s ease;
+}
+
+#welcome {
+  overflow: hidden;
+  transition: max-height 0.5s ease, opacity 0.5s ease, padding 0.3s ease;
+  font-size: 11px;
+  line-height: 1.5;
+  font-size:0.9em;
+}
+
+#welcome.collapsed {
+  max-height: 0;
+  opacity: 0;
+  padding: 0;
+  margin: 0;
+  pointer-events: none;
+}
+
+/* Contact links */
+#welcome a {
+  color: blue;
+  text-decoration: underline;
+  display: block;
+  font-size: 0.9em;
+}
+
+/* Toggle Button */
+#toggleBtn {
+  padding: 6px 10px;
+  font-size: 0.9em;
+  margin-top: 10px;
+  cursor: pointer;
+  background-color: #ddd;
+  border: none;
+  border-radius: 4px;
+  align-self: flex-start;
+  transition: background-color 0.3s ease;
+}
+
+#toggleBtn:hover {
+  background-color: #ccc;
+}
+
+/* Map */
+#map {
+  width: 80%;
+  height: 100%;
+}
+
+/* Style search box */
+.leaflet-control-geocoder {
+  margin-top: 10px;
+  margin-right: 10px;
+  z-index: 1000;
+}
+#viewToggle {
+  margin-top: 15px;
+}
+
+#toggleViewButton {
+  padding: 6px 12px;
+  font-size: 0.9em;
+  cursor: pointer;
+  background-color: #e0e0e0;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+#toggleViewButton:hover {
+  background-color: #d0d0d0;
+}
+
+.section-divider {
+  border: none;
+  border-top: 1px solid #ccc;
+  margin: 15px 0;
+}
+
+#filterPanel {
+  font-size: 0.9em;
+  color: #1B5E20;
+}
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.filter-label {
+  background-color: #ddd;
+  border: none;
+  padding: 5px 8px;
+  font-weight: bold;
+  cursor: default;
+  margin-right: 8px;
+  border-radius: 4px;
+}
+
+#yearStart, #yearEnd, #statusFilter {
+  flex: 1;
+  padding: 4px;
+  font-size: 0.9em;
+}
+
+.filter-actions {
+  margin-top: 10px;
+}
+
+#applyFiltersBtn, #clearFiltersBtn {
+  padding: 6px 12px;
+  font-size: 0.9em;
+  margin-right: 5px;
+  border: 1px solid #bbb;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#applyFiltersBtn:hover, #clearFiltersBtn:hover {
+  background-color: #d0d0d0;
+}
+
+#resultsCount {
+  margin-top: 10px;
+  font-weight: bold;
+  color: #4C7EA7;
+}
+/* GeoJSON Layer Scrollable Panel */
+#geojsonPanel {
+  max-height: 250px;
+  overflow-y: auto;
+  padding-right: 4px;
+  font-size: 0.9em;
+  color: #1B5E20;
+}
+
+#geojsonLayerList{
+  color: #000000;
+  font-size: 12px;  
+}
+
+.layer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.geojson-layer {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 2px;
+}
+
+.geojson-layer label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: bold;
+}
+
+.geojson-layer sup a {
+  font-size: 0.9em;
+  color: #1b7954;
+}
+
+.geojson-layer sup a:hover {
+  color: #006699;
+}
+
+.opacity-slider {
+  width: 90%
+}
+.label-toggle-text {
+  font-size: 0.85em;
+  color: #333;
+  margin-left: 4px;
+}
+.custom-legend {
+  background: white;
+  border: 1px solid #999;
+  border-radius: 5px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  padding: 5px 10px;
+  font-size: 0.85em;
+  max-width: 250px;
+  max-height: 300px;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  cursor: pointer;
+}
+
+.custom-legend .legend-toggle {
+  font-weight: bold;
+  padding: 2px 0;
+  user-select: none;
+}
+
+.custom-legend .legend-content {
+  overflow-y: auto;
+  max-height: 200px;
+  margin-top: 4px;
+  display: none;
+}
+
+.custom-legend .legend-content.expanded {
+  display: block;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+
+.legend-item span {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border: 1px solid #333;
+}
+.road-label {
+  color: white;
+  text-shadow: 3px 3px 2px black, -1px -1px 2px black;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+#drawTools .leaflet-draw {
+  margin-top: 10px;
+  padding-left: 0;
+}
+
+#drawTools .leaflet-draw-toolbar a {
+  margin: 0 4px 6px 0;
+}
+#drawTools {
+  max-height: 150px;
+  overflow-y: auto;
+  color: #1B5E20
+}
+
+.leaflet-draw-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.leaflet-draw-toolbar a {
+  margin: 0 !important;
+}
+
+#nslAnalysis {
+  color: #1B5E20;
+  font-size: 0.9em;
+}
+
+.nsl-heading {
+  margin-bottom: 8px;
+}
+
+.nsl-buttons button {
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+  margin-bottom: 6px;
+  font-size: 0.85em;
+  background-color: #e0e0e0;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.nsl-buttons button:hover {
+  background-color: #d0d0d0;
+}
+
+.cec-contact {
+  font-size: 0.6em;
+  margin-top: 10px;
+  color: #000;
+}
+
+.cec-contact a {
+  color: blue;
+  text-decoration: underline;
+}
+
+/* NSL Modal */
+.nsl-modal {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 25%;
+  width: 60%;
+  height: 95%;
+  background: white;
+  z-index: 9999;
+  overflow-y: auto;
+  padding: 20px;
+  border-left: 2px solid #ccc;
+  box-shadow: -3px 0 6px rgba(0, 0, 0, 0.2);
+}
+
+.nsl-modal-content h3 {
+  margin-top: 0;
+  color: #1B5E20;
+}
+
+.nsl-modal-content label {
+  display: block;
+  margin-top: 12px;
+  font-weight: bold;
+  font-size: 0.95em;
+}
+
+.nsl-modal-content input[type="text"],
+.nsl-modal-content textarea {
+  width: 100%;
+  padding: 6px;
+  margin-top: 4px;
+  font-size: 0.9em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.location-input {
+  display: flex;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.location-input input {
+  flex: 2;
+}
+
+.location-input button {
+  flex: 1;
+  font-size: 0.85em;
+  padding: 6px;
+  background-color: #e0e0e0;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.location-input button:hover {
+  background-color: #d0d0d0;
+}
+
+.da-table-container {
+  height: 60%;
+  max-height: 350px; /* Prevent overflow on small screens */
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  margin-top: 10px;
+}
+
+#heading{
+	font-size: 1.7em;
+	font-weight: bold;
+	color: #047a4f;
+	background-color: #c7eddf;
+	margin-right: 10%;
+	padding: 1%;
+}
+
+#projectt{
+	margin-top: 1%;
+	margin-left: 1%;
+	font-size: 1em;
+	font-weight: bold;
+}
+
+#outputProjectTitle{
+	font-size: 1em;
+	margin-left: 1%;
+	font-weight: 400;
+	display: flex;
+}
+
+#CECnum{
+	margin-left: 1%;
+	font-size: 1em;
+	font-weight: bold;
+	font: Arial;
+}
+
+#outputCecNumber{
+	font-size: 1em;
+	margin-left: 1%;
+	font-weight: 400;	
+}
+
+#selectedActivitiesList{
+	margin-left: 1%;
+	font-size: 1em;
+	font-weight: bold;
+	font: Arial;
+}
+
+#activityListOutput{
+	font-size: 1em;
+	margin-left: 1%;
+	margin-top: -2%;
+	font-weight: 400;	
+}
+
+.chart-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#nslGraphCanvas {
+  width: 150px;
+  height: auto;
+  max-width: 100%;
+  display: block;
+}
+
+#daTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85em;
+}
+
+#daTable th, #daTable td {
+  border: 1px solid #ccc;
+  padding: 6px;
+  text-align: left;
+}
+
+#daTable select {
+  width: 100%;
+}
+
+.modal-actions {
+  margin-top: 15px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-actions button {
+  padding: 6px 12px;
+  font-size: 0.9em;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  background-color: #e0e0e0;
+  cursor: pointer;
+}
+
+.modal-actions button:hover {
+  background-color: #d0d0d0;
+}
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 18px;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #888;
+  z-index: 10000;
+}
+
+.modal-close:hover {
+  color: #000;
+}
+
+/* Risk Table Styles */
+#riskTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78em;
+  table-layout: fixed;
+}
+
+#riskTable th, #riskTable td {
+  border: 1px solid #ccc;
+  padding: 6px;
+  vertical-align: top;
+  text-align: left;
+}
+
+#riskTable th {
+  background-color: #f2f2f2;
+}
+
+#riskTable select {
+  width: 100%;
+  padding: 3px;
+}
+
+#riskAssessmentModal .da-table-container {
+  height: 60%;
+  max-height: 600px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  margin-top: 10px;
+}
+/* Alternating row colors: light green and light blue */
+#daTable tbody tr:nth-child(odd),
+#riskTable tbody tr:nth-child(odd) {
+  background-color: #e6f5e6; /* Light green */
+}
+
+#daTable tbody tr:nth-child(even),
+#riskTable tbody tr:nth-child(even) {
+  background-color: #e6f0fa; /* Light blue */
+}
+
+#modelOutputModal ul {
+  padding: 2%;
+  font-size: 1em;
+}
+
+#spatialhead{
+  margin-top: 10px;
+  font-size: 1em;
+  background: #e4f7f0;
+  color: #136346;
+  padding: 8px;
+  border-left: 4px solid #bbb	
+}
+
+#nslResult {
+  margin-top: 10px;
+  margin-left: 1%;
+  font-size: 0.9em;
+}
+
+#nslDecisionText {
+  font-weight: bold;
+  color: #1B5E20;
+  background-color: #d1d1cd;
+  padding: 2px;
+}
+
+#nslDetails {
+  margin-top: 10px;
+  font-size: 1em;
+  background: #e4f7f0;
+  color:#136346;
+  padding: 8px;
+  border-left: 4px solid #bbb;
+}
+
+#nslIndexDetail{
+   margin-left:10px;
+   margin-right:10px;
+   text-align: justify;
+   text-justify: inter-word;
+   font-size: 1.1em;
+}
+
+
+#cecList table {
+  table-layout: fixed;
+  word-wrap: break-word;
+  word-break: break-word;
+  margin-left: 10px;
+  
+}
+#cecList th,
+#cecList td {
+  padding: 10px;
+  vertical-align: top;
+  white-space: normal;
+}
+#cectab{
+	padding: 10px
+}
+#receptorInt{
+   margin-left:10px;
+   margin-right:10px;
+   text-align: justify;
+   text-justify: inter-word;	
+}
+
+
+
+#signatureSection {
+  margin-top: 15px;
+  font-size: 0.9em;
+}
+
+#typedSignature {
+  width: 100%;
+  padding: 6px;
+  font-size: 1.1em;
+  font-family: 'Segoe Script', cursive;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+#receptorsTable, #cecList table {
+  border-collapse: collapse;
+  
+}
+
+#receptorsTable th, #receptorsTable td,
+#cecList th, #cecList td {
+  border: 1px solid #ccc;
+  padding: 4px;
+  text-align: left;
+}
+
+.nsl-detail-text {
+  font-size: 0.9em;
+  margin-top: 0.75em;
+  line-height: 1.4;
+}
+
+#intersectingLabelsList {
+  list-style-type: none;
+  padding-left: 0;
+  margin-top: 10px;
+  font-size: 0.85em;
+  line-height: 1.8; /* Increased line spacing */
+}
+
+#intersectingLabelsList li {
+  margin-bottom: 6px;
+}
+
+#intersectingLabelsList li strong {
+  font-weight: bold;
+  display: inline-block;
+  min-width: 180px; /* Adjust this as needed */
+}
+
+#officerDecision {
+  width: 100%;
+  font-size: 0.9em;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  resize: none;
+  overflow: hidden;
+  box-sizing: border-box;
+  transition: height 0.2s ease;
+}
+
+#outputDate{
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+.output-date {
+  text-align: right;
+  font-size: 0.8em;
+  margin-top: 20px;
+  color: #555;
+}
+
+/* -------- NSL Model Output Print Styling -------- */
+#modelOutputModal {
+  max-width: 850px;
+  margin: 20px auto;
+  padding: 20px;
+  background: white;
+  border: 2px solid #ccc;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  font-size: 0.9em;
+  color: #000
+}
+
+.output-section {
+  border: 1px solid #aaa;
+  margin-bottom: 12px;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.output-section h4 {
+  margin-top: 0;
+  color: #1B5E20;
+}
+
+#nslGraph {
+  max-width: 300px;
+  max-height: 180px;
+  display: block;
+  margin: 10px auto;
+}
+
+#designatedActivitiesList {
+  font-size: 0.9em;
+  margin: 10px 0;
+  padding-left: 18px;
+}
+
+#receptorTable, #cecTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85em;
+  margin-top: 10px;
+}
+
+#receptorTable th, #receptorTable td,
+#cecTable th, #cecTable td {
+  border: 1px solid #aaa;
+  padding: 6px;
+}
+
+#intersectingFeaturesTable {
+  width: 100%;
+  font-size: 0.85em;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+#intersectingFeaturesTable td {
+  border: 1px solid #aaa;
+  padding: 6px;
+  vertical-align: top;
+}
+
+#officerComments {
+  width: 100%;
+  min-height: 50px;
+  font-size: 0.9em;
+  border: 1px solid #aaa;
+  padding: 6px;
+  border-radius: 4px;
+  resize: none;
+  overflow: hidden;
+}
+
+#modelDate {
+  font-size: 0.75em;
+  color: #333;
+  text-align: right;
+  margin-top: 12px;
+}
+
+#downloadOptions {
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#modelOutputModal {
+  width: 90%;
+  max-width: 816px; /* Optional: Limit width on large screens */
+  height: 100vh;     /* ⬅️ Makes height equal to screen height */
+  overflow-y: auto;  /* Allow scroll if content is taller than screen */
+  background: white;
+  padding: 20px;
+  box-sizing: border-box;
+  margin: auto;
+  border-radius: 6px;
+}
+
+/* Right Panel (unchanged from previous setup) */
+#rightPanel {
+  position: absolute;
+  top: 110px;
+  right: 0;
+  bottom: 50px;
+  width: 0px;
+  background: #f9f9f9;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+  transition: width 0.3s ease;
+  z-index: 998; /* Below toggle */
+  overflow: hidden;
+}
+
+#rightPanel.expanded {
+  width: 400px;
+}
+
+/* Toggle Button Container */
+#rightPanelToggleContainer {
+  position: absolute;
+  top: 110px;
+  right: 0px; /* same as collapsed panel width */
+  z-index: 999;
+}
+
+#rightPanel.expanded + #rightPanelToggleContainer {
+  right: 300px; /* match expanded panel width */
+}
+
+/* Toggle Button */
+#rightPanelToggle {
+  width: 30px;
+  height: 30px;
+  background-color: #ddd;
+  border: 1px solid #aaa;
+  border-right: none;
+  border-radius: 4px 0 0 4px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.right-panel-content {
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  gap: 2px;
+  height: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.section-block {
+  flex: 0 0 12%;
+  margin: 2px 5px;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-left: 4px solid #4B8F29; /* dark green highlight */
+  background-color: #f5f5f5;
+  box-sizing: border-box;
+}
+
+.section-label {
+  font-size: 1em;
+  font-weight: bold;
+  color: #1B5E20; /* dark green */
+  margin-bottom: 4px;
+}
+
+.section-placeholder {
+  flex: 1;
+  padding: 6px;
+  font-style: italic;
+  color: #666;
+  text-align: center;
+  margin-top: 8px;
+  border-top: 1px dashed #aaa;
+}
+.section-blockA{
+  flex: 0 0 11%;
+  margin: 2px 5px;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-left: 4px solid #4B8F29; /* dark green highlight */
+  background-color: #f5f5f5;
+  box-sizing: border-box;
+}
+
+.section-block2 {
+  flex: 0 0 7%;
+  margin: 2px 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  border-left: 4px solid #4B8F29;
+  box-sizing: border-box;
+  gap: 10px;
+  padding: 0 8px;
+}
+
+#useDrawnFeatureBtn {
+  padding: 8px 8px;
+  font-size: 0.95em;
+  font-weight: bold;
+  color: #0D47A1; /* Dark blue text */
+  background-color: #BBDEFB; /* Light blue background */
+  border: 1px solid #90CAF9;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#useDrawnFeatureBtn:hover {
+  background-color: #90CAF9;
+}
+
+/* Base styling for all tables with this style */
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+  border: 1px solid #ccc;
+}
+
+/* Light blue header row */
+.styled-table thead tr {
+  background-color: #d0e7f9;
+  color: #000;
+  font-weight: bold;
+}
+
+/* Cell padding and border */
+.styled-table th, .styled-table td {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+}
+
+/* Alternating row colors: light green and light orange */
+.styled-table tbody tr:nth-child(odd) {
+  background-color: #e6f5e6; /* light green */
+}
+
+.styled-table tbody tr:nth-child(even) {
+  background-color: #fff3e6; /* light orange */
+}
+
+#intersectingLabelsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#intersectingLabelsList li {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 4px;
+}
+
+#intersectingLabelsList li strong {
+  width: 160px; 
+  min-width: 160px;
+  flex-shrink: 0;
+  display: inline-block;
+  color: #282b28;
+}
+
+#intersectingLabelsList li span {
+  flex: 1;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
